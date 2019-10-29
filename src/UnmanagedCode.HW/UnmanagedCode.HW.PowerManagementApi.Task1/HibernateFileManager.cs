@@ -31,14 +31,9 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task1
                 IntPtr.Zero,
                 0);
             Marshal.FreeHGlobal(intPtr);
-            if (retval == PowerManagementInterop.STATUS_SUCCESS)
-            {
-                
-            }
-            else
+            if (retval != PowerManagementInterop.STATUS_SUCCESS)
             {
                 throw new Win32Exception();
-                //throw new ApplicationException("CallNtPowerInformation returned: " + retval + " ");
             }
 
 
@@ -48,7 +43,6 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task1
         {
             Delete = 0,
             Reserve = 1,
-
         }
 
     }

@@ -39,7 +39,7 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task3.Tests
         }
 
         [TestMethod]
-        public void TryGetProcessorInforamtion()
+        public void TryGetProcessorInformation()
         {
             var processorPowerModel = _powerManagerCustom.GetProcessorPowerModel();
             Assert.IsTrue(

@@ -16,7 +16,7 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task2COM.Models
 
         public override string ToString()
         {
-            if (Items == null || Items.Length ==0)
+            if (Items == null || Items.Length == 0)
             {
                 return "no Items";
             }

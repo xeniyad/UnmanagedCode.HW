@@ -21,8 +21,8 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task1
                 properies.AddRange(queryObj.Properties.Cast<PropertyData>());
             }
 
-            var lasBootUpProperty = properies.First(x => x.Name == "LastBootUpTime");
-            DateTime dateTime = ManagementDateTimeConverter.ToDateTime(lasBootUpProperty.Value.ToString());
+            var lastBootUpProperty = properies.First(x => x.Name == "LastBootUpTime");
+            DateTime dateTime = ManagementDateTimeConverter.ToDateTime(lastBootUpProperty.Value.ToString());
             return dateTime;
         }
 
@@ -59,7 +59,6 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task1
         {
             long lastSleepTimeTicks = GetStructure<long>(PowerInformationLevel.LastSleepTime);
 
-            //Console.WriteLine("lastSleepTime in ticks" + lastSleepTimeTicks);
             DateTime bootUpTime = GetLastBootUpTime();
             DateTime lastSleepTime = bootUpTime.AddTicks(lastSleepTimeTicks);
             return lastSleepTime;
@@ -68,8 +67,6 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task1
         public DateTime GetLastWakeTime()
         {
             long lastWakeTimeTicks = GetStructure<long>(PowerInformationLevel.LastWakeTime);
-
-            //Console.WriteLine("lastWakeTime in ticks" + lastWakeTimeTicks);
 
             DateTime bootUpTime = GetLastBootUpTime();
             DateTime lastWakeTime = bootUpTime.AddTicks(lastWakeTimeTicks);
@@ -80,10 +77,6 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task1
         public SystemBatteryState GetSystemBatteryState()
         {
             var batteryState = GetStructure<SystemBatteryState>(PowerInformationLevel.SystemBatteryState);
-
-            //Console.WriteLine(batteryState.AcOnLine);
-            //Console.WriteLine(batteryState.BatteryPresent);
-            //Console.WriteLine(batteryState.Charging);
 
             return batteryState;
 
@@ -101,14 +94,7 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task1
                 procInfo.Length*Marshal.SizeOf(typeof (ProcessorPowerInformation))
                 );
 
-            if (retval == PowerManagementInterop.STATUS_SUCCESS)
-            {
-                //foreach (var item in procInfo)
-                //{
-                //    Console.WriteLine(item.CurrentMhz);
-                //}
-            }
-            else
+            if (retval != PowerManagementInterop.STATUS_SUCCESS)
             {
                 throw new Win32Exception();
             }
