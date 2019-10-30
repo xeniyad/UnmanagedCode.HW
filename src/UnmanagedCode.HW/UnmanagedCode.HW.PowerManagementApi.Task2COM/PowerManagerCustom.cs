@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using UnmanagedCode.HW.PowerManagementApi.Task1;
+using UnmanagedCode.HW.PowerManagementApi.Task1.Wrappers;
 using UnmanagedCode.HW.PowerManagementApi.Task2COM.Interfaces;
 using UnmanagedCode.HW.PowerManagementApi.Task2COM.Models;
 
@@ -21,9 +19,12 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task2COM
 
         public PowerManagerCustom()
         {
-            _powerManager = new PowerManager();
-            _suspendManager = new SuspendManager();
-            _hibernateFileManager = new HibernateFileManager();
+            var powerInterop = new PowerManagementInteropWrapper();
+            var marshal = new MarshalProvider();
+
+            _powerManager = new PowerManager(marshal, powerInterop);
+            _suspendManager = new SuspendManager(powerInterop);
+            _hibernateFileManager = new HibernateFileManager(marshal, powerInterop);
         }
 
         public void ReserveFile()

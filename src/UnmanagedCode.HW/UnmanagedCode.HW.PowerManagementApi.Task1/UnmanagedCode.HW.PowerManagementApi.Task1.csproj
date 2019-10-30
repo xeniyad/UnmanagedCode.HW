@@ -78,13 +78,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HibernateFileManager.cs" />
-    <Compile Include="PowerInformationLevel.cs" />
+    <Compile Include="Responses\PointerResult.cs" />
+    <Compile Include="Structures\HibernateFileActions.cs" />
+    <Compile Include="Structures\PowerInformationLevel.cs" />
     <Compile Include="PowerManagementInterop.cs" />
     <Compile Include="PowerManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures\ProcessorPowerInformation.cs" />
     <Compile Include="Structures\SystemBatteryState.cs" />
     <Compile Include="SuspendManager.cs" />
+    <Compile Include="Wrappers\MarshalProvider.cs" />
+    <Compile Include="Wrappers\PowerManagementInteropWrapper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Win32Api\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

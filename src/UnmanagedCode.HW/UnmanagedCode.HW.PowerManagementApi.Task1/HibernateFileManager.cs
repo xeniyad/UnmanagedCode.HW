@@ -1,49 +1,48 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
+using UnmanagedCode.HW.PowerManagementApi.Task1.Responses;
+using UnmanagedCode.HW.PowerManagementApi.Task1.Structures;
+using UnmanagedCode.HW.PowerManagementApi.Task1.Wrappers;
 
 namespace UnmanagedCode.HW.PowerManagementApi.Task1
 {
     public class HibernateFileManager
     {
-        public void ReserveFile()
-        {
-            HibernateFileAction(HibernateFileActions.Reserve);
+        private readonly MarshalProvider _marshal;
+        private readonly PowerManagementInteropWrapper _powerManagementInterop;
 
+        public HibernateFileManager(MarshalProvider marshal, PowerManagementInteropWrapper powerManagementInterop)
+        {
+            _marshal = marshal;
+            _powerManagementInterop = powerManagementInterop;
         }
 
-        public void DeleteFile()
+        public PointerResult ReserveFile()
         {
-            HibernateFileAction(HibernateFileActions.Delete);
-
+            return HibernateFileAction(Structures.HibernateFileAction.Reserve);
         }
 
-        private void HibernateFileAction(HibernateFileActions fileActions)
+        public PointerResult DeleteFile()
         {
-            int intSize = Marshal.SizeOf<bool>();
-            IntPtr intPtr = Marshal.AllocCoTaskMem(intSize);
-            Marshal.WriteByte(intPtr, (byte)fileActions);
-
-            var retval = PowerManagementInterop.CallNtPowerInformation(
-                (int) PowerInformationLevel.SystemReserveHiberFile,
-                intPtr,
-                intSize,
-                IntPtr.Zero,
-                0);
-            Marshal.FreeHGlobal(intPtr);
-            if (retval != PowerManagementInterop.STATUS_SUCCESS)
-            {
-                throw new Win32Exception();
-            }
-
-
+            return HibernateFileAction(Structures.HibernateFileAction.Delete);
         }
 
-        private enum HibernateFileActions
+        private PointerResult HibernateFileAction(HibernateFileAction fileAction)
         {
-            Delete = 0,
-            Reserve = 1,
-        }
+            int intSize = _marshal.SizeOf<bool>();
+            IntPtr pointer = _marshal.AllocateMemory(intSize);
+            _marshal.WriteBytes(pointer, fileAction);
 
+            const int outputBufferSize = 0;
+            PointerResult result = _powerManagementInterop.CallNtPowerInformation(
+                informationLevel: PowerInformationLevel.SystemReserveHiberFile,
+                inputBuffer: pointer,
+                inputBufSize: intSize,
+                outputBuffer: IntPtr.Zero,
+                outputBufferSize: outputBufferSize);
+
+            _marshal.ReleasePointer(pointer);
+
+            return result;
+        }
     }
 }

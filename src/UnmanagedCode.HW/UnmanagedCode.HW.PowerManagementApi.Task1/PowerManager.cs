@@ -1,56 +1,68 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Management;
-using System.Runtime.InteropServices;
+using UnmanagedCode.HW.PowerManagementApi.Task1.Responses;
 using UnmanagedCode.HW.PowerManagementApi.Task1.Structures;
+using UnmanagedCode.HW.PowerManagementApi.Task1.Wrappers;
 
 namespace UnmanagedCode.HW.PowerManagementApi.Task1
 {
     public class PowerManager
     {
+        private readonly MarshalProvider _marshal;
+
+        private readonly PowerManagementInteropWrapper _powerManagementInterop;
+
+        public PowerManager(MarshalProvider marshal, PowerManagementInteropWrapper powerManagementInterop)
+        {
+            _marshal = marshal
+                ?? throw new ArgumentNullException(nameof(marshal));
+            _powerManagementInterop = powerManagementInterop
+                                      ?? throw new ArgumentNullException(nameof(powerManagementInterop));
+        }
+
         private DateTime GetLastBootUpTime()
         {
             var osClass = new ManagementClass("Win32_OperatingSystem");
-            var properies = new List<PropertyData>();
+            var properties = new List<PropertyData>();
 
             foreach (var queryObj in osClass.GetInstances())
             {
-                properies.AddRange(queryObj.Properties.Cast<PropertyData>());
+                properties.AddRange(queryObj.Properties.Cast<PropertyData>());
             }
 
-            var lastBootUpProperty = properies.First(x => x.Name == "LastBootUpTime");
+            var lastBootUpProperty = properties.First(x => x.Name == "LastBootUpTime");
             DateTime dateTime = ManagementDateTimeConverter.ToDateTime(lastBootUpProperty.Value.ToString());
             return dateTime;
         }
 
         private T GetStructure<T>(PowerInformationLevel informationLevel)
         {
-            var informaitonLevel = (int)informationLevel;
             IntPtr lpInBuffer = IntPtr.Zero;
             int inputBufSize = 0;
-            int outputPtrSize = Marshal.SizeOf<T>();
-            IntPtr outputPtr = Marshal.AllocCoTaskMem(outputPtrSize);
+            int outputPtrSize = _marshal.SizeOf<T>();
+            IntPtr outputPtr = _marshal.AllocateMemory(size: outputPtrSize);
 
-            var retval = PowerManagementInterop.CallNtPowerInformation(
-                informaitonLevel,
-                lpInBuffer,
-                inputBufSize,
-                outputPtr,
-                outputPtrSize);
+            PointerResult result = _powerManagementInterop.CallNtPowerInformation(
+                informationLevel: informationLevel,
+                inputBuffer: lpInBuffer,
+                inputBufSize: inputBufSize,
+                outputBuffer: outputPtr,
+                outputBufferSize: outputPtrSize);
 
-            Marshal.FreeHGlobal(lpInBuffer);
-            if (retval == PowerManagementInterop.STATUS_SUCCESS)
+            _marshal.ReleasePointer(lpInBuffer);
+
+            if (result.IsSuccessful)
             {
-                var obj = Marshal.PtrToStructure<T>(outputPtr);
-                Marshal.FreeHGlobal(outputPtr);
-                return obj;
+                T properties = _marshal.ToProperties<T>(outputPtr);
+                _marshal.ReleasePointer(outputPtr);
+                return properties;
             }
             else
             {
-                Marshal.FreeHGlobal(outputPtr);
+                _marshal.ReleasePointer(outputPtr);
                 throw new Win32Exception();
             }
         }
@@ -86,15 +98,17 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task1
         {
             var procCount = Environment.ProcessorCount;
             var procInfo = new ProcessorPowerInformation[procCount];
-            var retval = PowerManagementInterop.CallNtPowerInformation(
-                (int) PowerInformationLevel.ProcessorInformation,
-                IntPtr.Zero,
-                0,
-                procInfo,
-                procInfo.Length*Marshal.SizeOf(typeof (ProcessorPowerInformation))
-                );
 
-            if (retval != PowerManagementInterop.STATUS_SUCCESS)
+            var nOutputBufferSize = procInfo.Length * _marshal.SizeOf<ProcessorPowerInformation>();
+
+            PointerResult result = _powerManagementInterop.CallNtPowerInformation(
+                informationLevel:PowerInformationLevel.ProcessorInformation,
+                lpInputBuffer: IntPtr.Zero,
+                inputBufSize: 0,
+                lpOutputBuffer: procInfo,
+                nOutputBufferSize: nOutputBufferSize);
+
+            if (!result.IsSuccessful)
             {
                 throw new Win32Exception();
             }
