@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnmanagedCode.HW.PowerManagementApi.Task2COM;
 
@@ -39,7 +35,7 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task3.Tests
         }
 
         [TestMethod]
-        public void TryGetProcessorInforamtion()
+        public void TryGetProcessorInformation()
         {
             var processorPowerModel = _powerManagerCustom.GetProcessorPowerModel();
             Assert.IsTrue(

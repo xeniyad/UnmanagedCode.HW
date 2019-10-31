@@ -25,8 +25,7 @@ namespace UnmanagedCode.HW.PowerManagementApi.Task2COM.Models
                             + $"    CurrentMhz: {CurrentMhz}\n"
                             + $"    MhzLimit: {MhzLimit}\n"
                             + $"    MaxIdleState: {MaxIdleState}\n"
-                            + $"    CurrentIdleState: {CurrentIdleState}\n"
-                ;
+                            + $"    CurrentIdleState: {CurrentIdleState}\n";
             return result;
         }
     }
